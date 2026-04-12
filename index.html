@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X$V GROWS</title>
+<link rel="icon" href="favicon.ico" type="image/ico">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --green-deep: #173404;
+    --green-dark: #27500A;
+    --green-mid: #3B6D11;
+    --green-strong: #639922;
+    --green-bright: #97C459;
+    --green-light: #C0DD97;
+    --green-pale: #EAF3DE;
+    --gold: #EF9F27;
+    --gold-dark: #BA7517;
+    --bg: #0a0f07;
+    --bg2: #0f1a09;
+    --bg3: #131f0b;
+    --text: #e8f5d0;
+    --text-muted: #9ab87a;
+    --border: rgba(99,153,34,0.25);
+  }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,15,7,0.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .logo-icon { width: 38px; height: 38px; background: var(--green-mid); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: var(--green-pale); letter-spacing: -1px; border: 1px solid var(--green-strong); }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+  .logo-text .brand { font-size: 15px; font-weight: 700; color: var(--green-bright); letter-spacing: 2px; }
+  .logo-text .sub { font-size: 10px; color: var(--text-muted); letter-spacing: 3px; text-transform: uppercase; }
+  .nav-links { display: flex; gap: 0; }
+  .nav-links button { background: none; border: none; color: var(--text-muted); font-size: 13px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; padding: 8px 18px; cursor: pointer; border-radius: 6px; transition: all 0.2s; }
+  .nav-links button:hover, .nav-links button.active { color: var(--green-bright); background: rgba(99,153,34,0.1); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HOME */
+  .hero { min-height: calc(100vh - 64px); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4rem 2rem; position: relative; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(59,109,17,0.18) 0%, transparent 70%); pointer-events: none; }
+  .hero-art { width: 220px; height: 220px; margin-bottom: 2rem; opacity: 0.92; }
+  .hero-title { font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; letter-spacing: 6px; color: var(--green-bright); text-shadow: 0 0 60px rgba(151,196,89,0.3); line-height: 1; margin-bottom: 0.25rem; }
+  .hero-aka { font-size: clamp(0.9rem, 2vw, 1.1rem); letter-spacing: 6px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 1.5rem; }
+  .hero-tagline { font-size: clamp(1rem, 2.5vw, 1.4rem); color: var(--text); max-width: 560px; line-height: 1.6; margin-bottom: 2.5rem; opacity: 0.85; }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .btn-primary { background: var(--green-mid); color: var(--green-pale); border: 1px solid var(--green-strong); padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-primary:hover { background: var(--green-strong); transform: translateY(-1px); }
+  .btn-outline { background: transparent; color: var(--green-bright); border: 1px solid var(--green-strong); padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+  .btn-outline:hover { background: rgba(99,153,34,0.12); transform: translateY(-1px); }
+
+  .stats { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 4rem auto; max-width: 700px; background: var(--bg2); }
+  .stat { flex: 1; padding: 1.5rem 1rem; text-align: center; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-size: 2rem; font-weight: 800; color: var(--green-bright); }
+  .stat-label { font-size: 11px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-title { font-size: 1.8rem; font-weight: 800; color: var(--green-bright); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .section-sub { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 3rem; letter-spacing: 1px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem; transition: all 0.2s; }
+  .card:hover { border-color: var(--green-strong); transform: translateY(-3px); }
+  .card-icon { width: 48px; height: 48px; border-radius: 10px; background: rgba(59,109,17,0.25); border: 1px solid rgba(99,153,34,0.4); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+  .card-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; letter-spacing: 1px; }
+  .card-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.65; }
+
+  .yt-btn { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,0,0,0.15); border: 1px solid rgba(255,80,80,0.3); color: #ff8080; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: 1px; cursor: pointer; margin-top: 1.5rem; text-decoration: none; transition: all 0.2s; }
+  .yt-btn:hover { background: rgba(255,0,0,0.25); }
+
+  footer { border-top: 1px solid var(--border); padding: 2.5rem 2rem; text-align: center; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; }
+  footer .footer-brand { font-size: 1rem; font-weight: 800; color: var(--green-bright); letter-spacing: 3px; margin-bottom: 0.5rem; }
+  footer a { color: var(--green-strong); text-decoration: none; }
+
+  /* PRODUCTS PAGE */
+  .products-hero { padding: 4rem 2rem 2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(59,109,17,0.1) 0%, transparent 100%); }
+  .products-hero p { color: var(--text-muted); font-size: 0.95rem; margin-top: 0.5rem; max-width: 500px; margin: 0.75rem auto 0; }
+
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; padding: 3rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .product-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all 0.25s; }
+  .product-card:hover { border-color: var(--green-strong); transform: translateY(-4px); }
+
+  .product-img { width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; background: var(--bg3); border-bottom: 1px solid var(--border); position: relative; }
+  .product-badge { position: absolute; top: 12px; left: 12px; background: var(--green-mid); color: var(--green-pale); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+
+  .product-info { padding: 1.25rem; }
+  .product-name { font-size: 0.95rem; font-weight: 700; color: var(--text); margin-bottom: 4px; letter-spacing: 0.5px; }
+  .product-desc { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.5; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-price { font-size: 1.1rem; font-weight: 800; color: var(--green-bright); }
+
+  .visit-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent; border: 1px solid var(--green-strong);
+    color: var(--green-bright); padding: 8px 16px; border-radius: 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+  .visit-btn:hover { background: var(--green-mid); color: var(--green-pale); border-color: var(--green-mid); }
+  .visit-btn svg { transition: transform 0.2s; }
+  .visit-btn:hover svg { transform: translate(2px, -2px); }
+
+  /* GROW PAGE */
+  .grow-hero { padding: 4rem 2rem 2rem; text-align: center; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(59,109,17,0.1) 0%, transparent 100%); }
+  .grow-content { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+  .stage-card { display: flex; gap: 2rem; margin-bottom: 2.5rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s; }
+  .stage-card:hover { border-color: var(--green-strong); }
+  .stage-num { min-width: 90px; background: rgba(59,109,17,0.2); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1rem; text-align: center; }
+  .stage-num .num { font-size: 2.2rem; font-weight: 900; color: var(--green-bright); line-height: 1; }
+  .stage-num .label { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 6px; }
+  .stage-body { padding: 1.75rem; flex: 1; }
+  .stage-title { font-size: 1.05rem; font-weight: 700; color: var(--green-bright); letter-spacing: 1px; margin-bottom: 0.5rem; }
+  .stage-duration { font-size: 11px; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.75rem; font-weight: 600; }
+  .stage-text { font-size: 0.88rem; color: var(--text-muted); line-height: 1.75; }
+  .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 3rem; }
+  .tip-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; border-top: 3px solid var(--green-mid); }
+  .tip-title { font-size: 0.85rem; font-weight: 700; color: var(--green-light); letter-spacing: 1px; margin-bottom: 0.5rem; }
+  .tip-text { font-size: 0.8rem; color: var(--text-muted); line-height: 1.65; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="showPage('home')">
+    <img src="logo.png" style="width:38px; height:38px; border-radius:8px; object-fit:cover;" alt="X$V logo">
+    <div class="logo-text">
+      <span class="brand">XLU$IVE GROWS</span>
+      <span class="sub">Cannabis Cultivation</span>
+    </div>
+  </div>
+  <div class="nav-links">
+    <button class="active" id="nav-home" onclick="showPage('home')">Home</button>
+    <button id="nav-products" onclick="showPage('products')">Products</button>
+    <button id="nav-grow" onclick="showPage('grow')">How to Grow</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <svg class="hero-art" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(99,153,34,0.15)" stroke-width="1"/>
+      <circle cx="110" cy="110" r="88" fill="none" stroke="rgba(99,153,34,0.1)" stroke-width="0.5"/>
+      <line x1="110" y1="190" x2="110" y2="80" stroke="#3B6D11" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M110,78 C110,78 88,50 80,30 C95,42 105,58 110,68 C115,58 125,42 140,30 C132,50 110,78 110,78Z" fill="#3B6D11"/>
+      <path d="M110,78 C110,78 88,50 80,30 C95,42 105,58 110,68 C115,58 125,42 140,30 C132,50 110,78 110,78Z" fill="none" stroke="#639922" stroke-width="0.8"/>
+      <path d="M105,100 C105,100 75,88 52,74 C70,80 88,92 100,104 C88,98 72,96 55,100 C72,92 105,100 105,100Z" fill="#3B6D11" stroke="#639922" stroke-width="0.8"/>
+      <path d="M115,100 C115,100 145,88 168,74 C150,80 132,92 120,104 C132,98 148,96 165,100 C148,92 115,100 115,100Z" fill="#3B6D11" stroke="#639922" stroke-width="0.8"/>
+      <path d="M108,126 C108,126 72,118 46,115 C65,118 88,124 104,132 C90,124 74,128 58,138 C74,126 108,126 108,126Z" fill="#27500A" stroke="#639922" stroke-width="0.8"/>
+      <path d="M112,126 C112,126 148,118 174,115 C155,118 132,124 116,132 C130,124 146,128 162,138 C146,126 112,126 112,126Z" fill="#27500A" stroke="#639922" stroke-width="0.8"/>
+      <path d="M106,148 C106,148 68,148 42,152 C62,150 86,150 104,156 C90,148 72,152 55,165 C70,150 106,148 106,148Z" fill="#173404" stroke="#3B6D11" stroke-width="0.8"/>
+      <path d="M114,148 C114,148 152,148 178,152 C158,150 134,150 116,156 C130,148 148,152 165,165 C150,150 114,148 114,148Z" fill="#173404" stroke="#3B6D11" stroke-width="0.8"/>
+      <line x1="110" y1="78" x2="110" y2="72" stroke="#97C459" stroke-width="1" opacity="0.6"/>
+      <line x1="110" y1="190" x2="108" y2="165" stroke="#639922" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+      <circle cx="110" cy="110" r="104" fill="none" stroke="rgba(151,196,89,0.08)" stroke-width="2" stroke-dasharray="4 8"/>
+    </svg>
+    <div class="hero-title">X$V GROWS</div>
+    <div class="hero-aka">aka XLU$IVE GROWS</div>
+    <p class="hero-tagline">Premium legal cannabis cultivation — from seed to harvest, grown with passion, documented with purpose.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('products')">Shop Products</button>
+      <button class="btn-outline" onclick="showPage('grow')">Learn to Grow</button>
+    </div>
+  </div>
+
+  <div style="max-width:700px; margin: 0 auto;">
+    <div class="stats">
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Legal</div></div>
+      <div class="stat"><div class="stat-num">Organic</div><div class="stat-label">Methods</div></div>
+      <div class="stat"><div class="stat-num">Seed</div><div class="stat-label">to Harvest</div></div>
+      <div class="stat"><div class="stat-num">YT</div><div class="stat-label">Documented</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">The Brand</div>
+    <div class="section-sub">What we're about</div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2C12 2 8 7 8 12C8 14.2 9.8 16 12 16C14.2 16 16 14.2 16 12C16 7 12 2 12 2Z" fill="#639922"/>
+            <path d="M12 16V22M9 19H15" stroke="#97C459" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M7 10C7 10 3 11 3 15C3 17 5 18 7 17" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M17 10C17 10 21 11 21 15C21 17 19 18 17 17" stroke="#3B6D11" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="card-title">Legal Cultivation</div>
+        <div class="card-desc">Every grow is 100% compliant. We document the full process legally so you can follow along confidently.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="18" height="14" rx="2" stroke="#639922" stroke-width="1.5"/>
+            <path d="M8 21H16M12 17V21" stroke="#97C459" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M7 8L10 11L14 7L17 10" stroke="#97C459" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-title">YouTube Documented</div>
+        <div class="card-desc">Follow every grow live on the channel. Real results, real mistakes, real knowledge — nothing hidden.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3L14 8H19L15 11L17 16L12 13L7 16L9 11L5 8H10L12 3Z" stroke="#639922" fill="rgba(99,153,34,0.2)" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="card-title">XLU$IVE Quality</div>
+        <div class="card-desc">Premium genetics, top-tier techniques. XLU$IVE GROWS isn't just a name — it's the standard we hold every harvest to.</div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top: 3rem;">
+      <a class="yt-btn" href="https://www.youtube.com/@XSVGrows" onclick="return false;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff8080"><path d="M21.8 8S21.6 6.6 21 6c-.7-.7-1.5-.7-1.8-.8C16.6 5 12 5 12 5s-4.6 0-7.2.2C4.5 5.3 3.7 5.3 3 6c-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2S2.4 17.4 3 18c.7.7 1.6.7 2 .8 1.5.1 6.2.2 7 .2s4.6 0 7.2-.2c.3-.1 1.1-.1 1.8-.8.6-.6.8-2 .8-2S22 13.6 22 12v-1.5c0-1.6-.2-3.2-.2-3.2zM10 15V9l6 3-6 3z"/></svg>
+        Watch on YouTube
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-brand">X$V GROWS</div>
+    <div>XLU$IVE GROWS &nbsp;|&nbsp; <a href="https://www.youtube.com/@XSVGrows">YouTube</a> </div>
+    <div style="margin-top:0.5rem; font-size:0.7rem; opacity:0.5;">All cultivation is legal and compliant. Must be 21+ to purchase cannabis products where applicable.</div>
+  </footer>
+</div>
+
+<!-- PRODUCTS PAGE -->
+<div class="page" id="page-products">
+  <div class="products-hero">
+    <div class="section-title">Products</div>
+    <p>Official X$V Tested Products</p>
+  </div>
+
+  <div class="products-grid">
+
+    <div class="product-card">
+      <div class="product-img">
+  <div class="product-badge">Great Deal!</div>
+  <img src="tent.jpg" style="width:100%; height:100%; object-fit:fill;" alt="X$V Classic Tee">
+</div>
+      <div class="product-info">
+        <div class="product-name">Best Starter Setup</div>
+        <div class="product-desc">Spider Farmer EVO Grow Tent Kit Complete 28"x28"x63" SF-1000 Samsung LM301H EVO & Dimmable, Grow Tent Complete System.</div>
+        <div class="product-footer">
+          <div class="product-price">$299.99</div>
+          <a class="visit-btn" href="https://a.co/d/0fu9nkGY" target="_blank">
+            Visit
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+  <img src="grove.jpg" style="width:100%; height:100%; object-fit:cover;" alt="X$V Classic Tee">
+</div>
+      <div class="product-info">
+        <div class="product-name">Grove Curing Bags</div>
+        <div class="product-desc">TerpLoc ® will preserve your product at its highest quality from cultivation to consumption.</div>
+        <div class="product-footer">
+          <a class="visit-btn" href="https://grovebags.com/products/terploc-window-pouch-single" target="_blank">
+            Visit
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+         <div class="product-badge">Sponsor</div>
+  <img src="fastbuds.png" style="width:100%; height:100%; object-fit:cover;" alt="X$V Classic Tee">
+</div>
+      <div class="product-info">
+        <div class="product-name">42 Fast Buds</div>
+        <div class="product-desc">Best autoflowering genetics out there!</div>
+        <div class="product-footer">
+          <a class="visit-btn" href="https://grovebags.com/products/terploc-window-pouch-single" target="_blank">
+            Visit
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+         <div class="product-badge">$5 Promo!</div>
+  <img src="rqs.png" style="width:100%; height:100%; object-fit:fill;" alt="X$V Classic Tee">
+</div>
+      <div class="product-info">
+        <div class="product-name">Royal Queen Seeds</div>
+        <div class="product-desc">Amazing seed provider where i get all of my photoperiods</div>
+        <div class="product-footer">
+          <a class="visit-btn" href="https://www.royalqueenseeds.com/us/referral-register?ref=5787802" target="_blank">
+            Visit
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+        <div class="product-card">
+      <div class="product-img">
+  <img src="nutes.png" style="width:100%; height:100%; object-fit:fill;" alt="X$V Classic Tee">
+</div>
+      <div class="product-info">
+        <div class="product-name">Nutrients!</div>
+        <div class="product-desc">General Hydroponics FloraSeries and CALiMAGic Bundle</div>
+        <div class="product-footer">
+          <a class="visit-btn" href="https://a.co/d/0ezKCgvl" target="_blank">
+            Visit
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-brand">X$V GROWS</div>
+    <div>XLU$IVE GROWS &nbsp;|&nbsp; <a href="https://www.youtube.com/@XSVGrows">YouTube</a> </div>
+    <div style="margin-top:0.5rem; font-size:0.7rem; opacity:0.5;">All cultivation is legal and compliant. Must be 21+ to purchase cannabis products where applicable.</div>
+  </footer>
+</div>
+
+<!-- GROW PAGE -->
+<div class="page" id="page-grow">
+  <div class="grow-hero">
+    <div class="section-title">How to Grow</div>
+    <div class="section-sub" style="margin-bottom:0;">The XLU$IVE GROWS beginner-to-harvest guide</div>
+  </div>
+  <div class="grow-content">
+    <div style="background: rgba(99,153,34,0.06); border: 1px solid rgba(99,153,34,0.2); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 2.5rem; font-size: 0.85rem; color: var(--text-muted); line-height: 1.7;">
+      <strong style="color: var(--green-bright);">Legal disclaimer:</strong> Cannabis cultivation laws vary by location. Always verify your local and state laws before growing. This guide is for educational purposes in jurisdictions where cultivation is legal.
+    </div>
+    <div class="stage-card">
+      <div class="stage-num"><div class="num">01</div><div class="label">Stage</div></div>
+      <div class="stage-body">
+        <div class="stage-title">Germination</div>
+        <div class="stage-duration">3–10 Days</div>
+        <div class="stage-text">Start your seeds in a damp paper towel inside a sealed bag kept at 70–85°F. Once the taproot shows (~1/4 inch), plant in final pot with your preferred light soil mix. Keep humidity high (70–80%) can use a humidity dome and minimal light. Don't overwater — just keep the medium moist.</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-num"><div class="num">02</div><div class="label">Stage</div></div>
+      <div class="stage-body">
+        <div class="stage-title">Seedling Stage</div>
+        <div class="stage-duration">2–3 Weeks</div>
+        <div class="stage-text">Your seedling will push its first true fan leaves. Use a gentle light (18/6 schedule) and keep temps 70–77°F. Water sparingly around the seedling, not on top of it. Don't feed nutrients yet — seedling soil has everything it needs. Watch for damping off (stem rot) from overwatering.</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-num"><div class="num">03</div><div class="label">Stage</div></div>
+      <div class="stage-body">
+        <div class="stage-title">Vegetative Growth</div>
+        <div class="stage-duration">4–8 Weeks</div>
+        <div class="stage-text">This is where the plant builds its structure. Light schedule stays 18/6. Introduce nutrients (nitrogen-heavy for veg). Start training techniques: LST, topping, or FIMing to increase yields. Transplant up as roots fill the pot. Aim for a bushy, even canopy going into flower.</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-num"><div class="num">04</div><div class="label">Stage</div></div>
+      <div class="stage-body">
+        <div class="stage-title">Flowering</div>
+        <div class="stage-duration">8–11 Weeks</div>
+        <div class="stage-text">Switch to 12/12 light to trigger flower for photoperiod strains (autos flower automatically). Shift nutrients to phosphorus and potassium-heavy. Watch trichomes closely with a jeweler's loupe. Clear = not ready. Milky white = peak THC. Amber = more relaxing effect.</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-num"><div class="num">05</div><div class="label">Stage</div></div>
+      <div class="stage-body">
+        <div class="stage-title">Harvest, Dry & Cure</div>
+        <div class="stage-duration">3–8 Weeks Post-Chop</div>
+        <div class="stage-text">Flush the plant with plain water 1–2 weeks before harvest. Chop, wet trim if desired, then hang dry in a dark room at 60–70°F with 50–60% humidity for 7–14 days. trim and place buds in jars (grove bags for easy curing). Burp jars daily during the cure. A proper cure dramatically improves flavor, smoothness, and potency.</div>
+      </div>
+    </div>
+    <div style="margin-top: 3rem;">
+      <div class="section-title" style="font-size:1.2rem;">Pro Tips from X$V</div>
+      <div class="section-sub">Lessons from the grows</div>
+      <div class="tips-grid">
+        <div class="tip-card"><div class="tip-title">VPD matters</div><div class="tip-text">Vapor Pressure Deficit controls how well your plant transpires. Get a VPD chart and dial in your temp/humidity combo at each stage.</div></div>
+        <div class="tip-card"><div class="tip-title">Less is more with nutes</div><div class="tip-text">Most beginners overfeed. Start at 50% of recommended dosage and work up. Deficiencies are easier to fix than nutrient burn.</div></div>
+        <div class="tip-card"><div class="tip-title">pH is everything</div><div class="tip-text">Soil: 6.0–6.8. Hydro/coco: 5.8–6.5. Incorrect pH locks out nutrients even if they're present. Invest in a reliable pH pen.</div></div>
+        <div class="tip-card"><div class="tip-title">Document your grow</div><div class="tip-text">Log every feeding, watering, and training move. When something goes wrong (and it will), your notes are how you fix it next time.</div></div>
+        <div class="tip-card"><div class="tip-title">Don't rush the cure</div><div class="tip-text">A 60-day cure on average bud beats a 7-day cure on premium bud every time. Terpenes develop in the jar. Don't skip this step.</div></div>
+        <div class="tip-card"><div class="tip-title">Watch the channel</div><div class="tip-text">Every grow is documented on YouTube. See real-time decisions, mistakes and fixes. Learning from someone else's errors saves your plants.</div></div>
+      </div>
+    </div>
+    <div style="text-align:center; margin: 3rem 0;">
+      <a class="yt-btn" href="https://www.youtube.com/@XSVGrows" onclick="return false;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff8080"><path d="M21.8 8S21.6 6.6 21 6c-.7-.7-1.5-.7-1.8-.8C16.6 5 12 5 12 5s-4.6 0-7.2.2C4.5 5.3 3.7 5.3 3 6c-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.5c0 1.6.2 3.2.2 3.2S2.4 17.4 3 18c.7.7 1.6.7 2 .8 1.5.1 6.2.2 7 .2s4.6 0 7.2-.2c.3-.1 1.1-.1 1.8-.8.6-.6.8-2 .8-2S22 13.6 22 12v-1.5c0-1.6-.2-3.2-.2-3.2zM10 15V9l6 3-6 3z"/></svg>
+        Watch the Grows on YouTube
+      </a>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-brand">X$V GROWS</div>
+    <div>XLU$IVE GROWS &nbsp;|&nbsp; <a href="https://www.youtube.com/@XSVGrows">YouTube</a> </div>
+    <div style="margin-top:0.5rem; font-size:0.7rem; opacity:0.5;">All cultivation is legal and compliant. Must verify local laws before growing cannabis.</div>
+  </footer>
+</div>
+
+<script>
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>
