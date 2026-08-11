@@ -60,12 +60,19 @@
 
   .plant-tabs{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
   .plant-tab{
-    font-family:var(--font-mono); font-size:12px; padding:7px 13px; border-radius:20px;
+    font-family:var(--font-mono); font-size:12px; padding:7px 10px 7px 13px; border-radius:20px;
     border:1px solid var(--border); background:var(--bg-surface); color:var(--text-muted);
     cursor:pointer; transition:all .15s ease; white-space:nowrap;
+    display:inline-flex; align-items:center; gap:7px;
   }
   .plant-tab:hover{border-color:var(--leaf-dim); color:var(--text-primary);}
   .plant-tab.active{background:rgba(95,191,110,0.12); border-color:var(--leaf); color:var(--leaf);}
+  .plant-tab-remove{
+    width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    color:inherit; opacity:0.5; font-size:13px; line-height:1; cursor:pointer; flex-shrink:0;
+    transition:all .12s ease;
+  }
+  .plant-tab-remove:hover{opacity:1; background:rgba(197,105,92,0.25); color:var(--stress);}
   .plant-tab-add{
     font-family:var(--font-mono); font-size:12px; padding:7px 13px; border-radius:20px;
     border:1px dashed var(--border); background:transparent; color:var(--text-faint); cursor:pointer;
@@ -503,13 +510,42 @@
   function renderPlantTabs(){
     const el = document.getElementById('plantTabs');
     el.innerHTML = state.plants.map(p =>
-      `<button class="plant-tab ${p.id===state.currentPlantId?'active':''}" data-id="${p.id}">${escapeHtml(p.name)}</button>`
+      `<span class="plant-tab ${p.id===state.currentPlantId?'active':''}" data-id="${p.id}">
+        <span class="plant-tab-label">${escapeHtml(p.name)}</span>
+        <span class="plant-tab-remove" data-remove-id="${p.id}" title="Remove plant">✕</span>
+      </span>`
     ).join('') + `<button class="plant-tab-add" id="addPlantBtn">+ Add Plant</button>`;
 
-    el.querySelectorAll('.plant-tab').forEach(btn => {
-      btn.onclick = () => { state.currentPlantId = btn.dataset.id; render(); };
+    el.querySelectorAll('.plant-tab-label').forEach(label => {
+      label.onclick = () => { state.currentPlantId = label.closest('.plant-tab').dataset.id; render(); };
+    });
+    el.querySelectorAll('.plant-tab-remove').forEach(btn => {
+      btn.onclick = (e) => { e.stopPropagation(); removePlant(btn.dataset.removeId); };
     });
     document.getElementById('addPlantBtn').onclick = addPlant;
+  }
+
+  function removePlant(id){
+    const plant = state.plants.find(p => p.id === id);
+    if(!plant) return;
+    const entryCount = state.entries.filter(e => e.plantId === id).length;
+    const msg = entryCount > 0
+      ? `Remove "${plant.name}" and its ${entryCount} logged ${entryCount === 1 ? 'entry' : 'entries'}? This can't be undone.`
+      : `Remove "${plant.name}"?`;
+    if(!confirm(msg)) return;
+
+    state.plants = state.plants.filter(p => p.id !== id);
+    state.entries = state.entries.filter(e => e.plantId !== id);
+
+    if(state.plants.length === 0){
+      state.plants.push({ id: uid(), name:"My Plant", species:"Cannabis", stage:"Seedling", startDate: todayISO() });
+    }
+    if(state.currentPlantId === id){
+      state.currentPlantId = state.plants[0].id;
+    }
+    savePlants();
+    saveEntries();
+    render();
   }
 
   function addPlant(){
