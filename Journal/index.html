@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Greenhouse Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0F1712;
+    --bg-surface:#161F19;
+    --bg-elevated:#1D2922;
+    --bg-hover:#233024;
+    --border:#2B3A30;
+    --border-soft:#20291F;
+    --text-primary:#E9EFE9;
+    --text-muted:#8FA396;
+    --text-faint:#5C6E62;
+    --leaf:#5FBF6E;
+    --leaf-dim:#3E7A48;
+    --amber:#D4A94B;
+    --amber-dim:#8C7233;
+    --water:#5B9BB0;
+    --water-dim:#3B6B78;
+    --stress:#C5695C;
+    --stress-dim:#7A3F38;
+    --radius:10px;
+    --font-display:'Fraunces', serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(95,191,110,0.06), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(212,169,75,0.05), transparent 55%),
+      var(--bg-deep);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    min-height:100vh;
+    padding:28px 20px 60px;
+  }
+  .wrap{max-width:1180px; margin:0 auto;}
+
+  /* HEADER */
+  header{display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:16px; margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--border-soft);}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand svg{width:30px; height:30px; flex-shrink:0;}
+  .brand-text h1{font-family:var(--font-display); font-weight:600; font-size:26px; letter-spacing:0.2px; cursor:text; border-radius:6px; padding:2px 6px; margin-left:-6px; transition:background .12s ease;}
+  .brand-text h1:hover{background:var(--bg-hover);}
+  .brand-text h1:focus{outline:1px solid var(--leaf-dim); background:var(--bg-elevated); cursor:text;}
+  .brand-text p{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint); letter-spacing:1.5px; text-transform:uppercase; margin-top:2px;}
+
+  /* FOOTER / DATA */
+  .footer{margin-top:22px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; padding-top:16px; border-top:1px solid var(--border-soft);}
+  .footer-label{font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint); letter-spacing:0.6px;}
+  .footer-actions{display:flex; gap:8px;}
+  .footer-status{font-family:var(--font-mono); font-size:10.5px; color:var(--leaf); opacity:0; transition:opacity .3s ease;}
+  .footer-status.show{opacity:1;}
+
+  .plant-tabs{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .plant-tab{
+    font-family:var(--font-mono); font-size:12px; padding:7px 13px; border-radius:20px;
+    border:1px solid var(--border); background:var(--bg-surface); color:var(--text-muted);
+    cursor:pointer; transition:all .15s ease; white-space:nowrap;
+  }
+  .plant-tab:hover{border-color:var(--leaf-dim); color:var(--text-primary);}
+  .plant-tab.active{background:rgba(95,191,110,0.12); border-color:var(--leaf); color:var(--leaf);}
+  .plant-tab-add{
+    font-family:var(--font-mono); font-size:12px; padding:7px 13px; border-radius:20px;
+    border:1px dashed var(--border); background:transparent; color:var(--text-faint); cursor:pointer;
+  }
+  .plant-tab-add:hover{color:var(--amber); border-color:var(--amber-dim);}
+
+  /* STATS STRIP */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:22px;}
+  .stat-card{
+    background:var(--bg-surface); border:1px solid var(--border-soft); border-radius:var(--radius);
+    padding:14px 16px; position:relative; overflow:hidden;
+  }
+  .stat-card::before{content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--accent,var(--leaf));}
+  .stat-label{font-family:var(--font-mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px;}
+  .stat-value{font-family:var(--font-display); font-size:24px; font-weight:600;}
+  .stat-sub{font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-top:3px;}
+
+  /* MAIN GRID */
+  .main{display:grid; grid-template-columns:1.55fr 1fr; gap:18px;}
+  @media (max-width:880px){.main{grid-template-columns:1fr;} .stats{grid-template-columns:repeat(2,1fr);}}
+
+  .panel{background:var(--bg-surface); border:1px solid var(--border-soft); border-radius:var(--radius); padding:18px;}
+  .panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .panel-title{font-family:var(--font-display); font-size:17px; font-weight:600;}
+  .month-nav{display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; color:var(--text-muted);}
+  .month-nav button{background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-primary); width:26px; height:26px; border-radius:6px; cursor:pointer; font-size:13px;}
+  .month-nav button:hover{background:var(--bg-hover);}
+
+  /* CALENDAR */
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+  .cal-dow{font-family:var(--font-mono); font-size:9.5px; text-transform:uppercase; color:var(--text-faint); text-align:center; padding-bottom:4px; letter-spacing:1px;}
+  .cal-cell{
+    aspect-ratio:1; border-radius:8px; border:1px solid var(--border-soft); background:var(--bg-elevated);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer;
+    position:relative; transition:all .12s ease;
+  }
+  .cal-cell:hover{border-color:var(--leaf-dim); background:var(--bg-hover);}
+  .cal-cell.empty{visibility:hidden;}
+  .cal-cell.today{border-color:var(--amber);}
+  .cal-daynum{font-family:var(--font-mono); font-size:11px; color:var(--text-muted); z-index:2;}
+  .cal-cell.has-entry .cal-daynum{color:var(--text-primary); font-weight:600;}
+  .ring{position:absolute; inset:3px; border-radius:8px; border:2px solid transparent;}
+  .dot-row{position:absolute; bottom:4px; display:flex; gap:3px;}
+  .dot{width:4px; height:4px; border-radius:50%;}
+  .day-check{
+    position:absolute; top:3px; right:3px; width:13px; height:13px; border-radius:50%;
+    background:var(--leaf); display:flex; align-items:center; justify-content:center; z-index:3;
+  }
+  .day-check svg{width:8px; height:8px;}
+
+  .legend{display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint);}
+  .legend span{display:inline-flex; align-items:center; gap:5px;}
+  .legend i{width:8px; height:8px; border-radius:50%; display:inline-block;}
+
+  /* LOG */
+  .log-list{display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto; padding-right:4px;}
+  .log-entry{
+    background:var(--bg-elevated); border:1px solid var(--border-soft); border-radius:8px; padding:10px 12px;
+    cursor:pointer; transition:border-color .12s ease;
+  }
+  .log-entry:hover{border-color:var(--leaf-dim);}
+  .log-entry-top{display:flex; justify-content:space-between; align-items:center;}
+  .log-date{font-family:var(--font-mono); font-size:11px; color:var(--text-muted);}
+  .log-tags{display:flex; gap:5px;}
+  .tag{font-family:var(--font-mono); font-size:9.5px; padding:2px 7px; border-radius:10px; text-transform:uppercase; letter-spacing:0.4px;}
+  .tag.water{background:rgba(91,155,176,0.15); color:var(--water);}
+  .tag.feed{background:rgba(212,169,75,0.15); color:var(--amber);}
+  .tag.health-good{background:rgba(95,191,110,0.15); color:var(--leaf);}
+  .tag.health-mid{background:rgba(212,169,75,0.15); color:var(--amber);}
+  .tag.health-bad{background:rgba(197,105,92,0.15); color:var(--stress);}
+  .log-note{font-size:12.5px; color:var(--text-muted); margin-top:5px; line-height:1.4;}
+  .empty-state{color:var(--text-faint); font-size:12.5px; text-align:center; padding:40px 10px; font-family:var(--font-mono);}
+
+  .btn-primary{
+    font-family:var(--font-mono); font-size:12px; background:var(--leaf); color:#0F1712; border:none;
+    padding:9px 16px; border-radius:7px; cursor:pointer; font-weight:600; letter-spacing:0.3px;
+  }
+  .btn-primary:hover{background:#70cf7f;}
+  .btn-ghost{
+    font-family:var(--font-mono); font-size:12px; background:transparent; color:var(--text-muted);
+    border:1px solid var(--border); padding:8px 14px; border-radius:7px; cursor:pointer;
+  }
+  .btn-ghost:hover{border-color:var(--stress-dim); color:var(--stress);}
+
+  /* MODAL */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(6,10,7,0.72); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal{
+    background:var(--bg-surface); border:1px solid var(--border); border-radius:14px; padding:24px;
+    width:100%; max-width:480px; max-height:88vh; overflow-y:auto;
+  }
+  .modal h2{font-family:var(--font-display); font-size:19px; margin-bottom:4px;}
+  .modal .modal-date{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-bottom:18px; text-transform:uppercase; letter-spacing:1px;}
+  .field-group{margin-bottom:16px;}
+  .field-group-head{display:flex; align-items:center; gap:8px; margin-bottom:8px;}
+  .field-group-head label{font-family:var(--font-mono); font-size:11.5px; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-muted);}
+  .toggle{width:32px; height:18px; border-radius:10px; background:var(--bg-elevated); border:1px solid var(--border); position:relative; cursor:pointer; flex-shrink:0;}
+  .toggle.on{background:rgba(95,191,110,0.25); border-color:var(--leaf);}
+  .toggle::after{content:''; position:absolute; width:12px; height:12px; border-radius:50%; background:var(--text-faint); top:2px; left:2px; transition:all .15s ease;}
+  .toggle.on::after{background:var(--leaf); left:16px;}
+  .subfields{display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-left:2px;}
+  .subfields.hidden{display:none;}
+  input, textarea, select{
+    width:100%; background:var(--bg-elevated); border:1px solid var(--border); color:var(--text-primary);
+    padding:8px 10px; border-radius:7px; font-family:var(--font-body); font-size:13px;
+  }
+  input:focus, textarea:focus, select:focus{outline:none; border-color:var(--leaf-dim);}
+  textarea{resize:vertical; min-height:60px;}
+  .health-scale{display:flex; gap:6px;}
+  .health-btn{
+    flex:1; padding:8px 0; text-align:center; border-radius:7px; border:1px solid var(--border);
+    background:var(--bg-elevated); cursor:pointer; font-family:var(--font-mono); font-size:13px; color:var(--text-muted);
+  }
+  .health-btn.selected{background:rgba(95,191,110,0.18); border-color:var(--leaf); color:var(--leaf);}
+  .modal-actions{display:flex; justify-content:space-between; gap:10px; margin-top:20px;}
+  .modal-actions-right{display:flex; gap:8px;}
+
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+
+  .loading{text-align:center; padding:80px 20px; color:var(--text-faint); font-family:var(--font-mono); font-size:13px;}
+
+  .warn-banner{
+    display:flex; align-items:center; gap:10px; background:rgba(197,105,92,0.1); border:1px solid var(--stress-dim);
+    color:var(--stress); font-family:var(--font-mono); font-size:12px; padding:10px 14px; border-radius:8px; margin-bottom:18px; line-height:1.5;
+  }
+  .warn-banner strong{color:var(--text-primary);}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loading">loading your greenhouse…</div>
+</div>
+
+<script>
+(function(){
+  const STAGES = ["Seedling","Vegetative","Flowering","Harvest","Curing"];
+  let state = { plants: [], entries: [], settings:{ title:"Greenhouse Journal" }, currentPlantId: null, viewMonth: new Date().getMonth(), viewYear: new Date().getFullYear(), modalOpen:false, modalDate:null, modalEntry:null };
+
+  // Storage abstraction: uses Claude's window.storage when available (inside claude.ai),
+  // otherwise falls back to the browser's localStorage (for standalone/self-hosted use).
+  const hasClaudeStorage = typeof window.storage !== 'undefined' && window.storage !== null;
+  let hasLocalStorage = false;
+  try{
+    const t = '__gj_test__';
+    localStorage.setItem(t, '1');
+    localStorage.removeItem(t);
+    hasLocalStorage = true;
+  }catch(e){ hasLocalStorage = false; }
+  const persistenceMode = hasClaudeStorage ? 'claude' : (hasLocalStorage ? 'local' : 'none');
+  const LS_PREFIX = 'greenhouseJournal:';
+
+  const storageBridge = {
+    async get(key){
+      if(persistenceMode === 'claude'){
+        try{ const r = await window.storage.get(key, false); return r ? r.value : null; }
+        catch(e){ return null; }
+      } else if(persistenceMode === 'local'){
+        try{ return localStorage.getItem(LS_PREFIX + key); }
+        catch(e){ return null; }
+      }
+      return null;
+    },
+    async set(key, value){
+      if(persistenceMode === 'claude'){
+        try{ await window.storage.set(key, value, false); return true; }
+        catch(e){ console.error('claude storage set failed', e); return false; }
+      } else if(persistenceMode === 'local'){
+        try{ localStorage.setItem(LS_PREFIX + key, value); return true; }
+        catch(e){ console.error('localStorage set failed', e); return false; }
+      }
+      return false;
+    }
+  };
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function daysBetween(a,b){ return Math.round((new Date(b) - new Date(a)) / 86400000); }
+
+  async function loadState(){
+    if(persistenceMode === 'none'){
+      state.plants = [{ id: uid(), name:"My Plant", species:"Cannabis", stage:"Seedling", startDate: todayISO() }];
+      state.currentPlantId = state.plants[0].id;
+      render();
+      return;
+    }
+    try{
+      const p = await storageBridge.get('plants');
+      state.plants = p ? JSON.parse(p) : [];
+    }catch(e){ state.plants = []; }
+    try{
+      const e = await storageBridge.get('entries');
+      state.entries = e ? JSON.parse(e) : [];
+    }catch(e){ state.entries = []; }
+    try{
+      const s = await storageBridge.get('settings');
+      state.settings = s ? JSON.parse(s) : { title:"Greenhouse Journal" };
+    }catch(e){ state.settings = { title:"Greenhouse Journal" }; }
+
+    if(state.plants.length === 0){
+      state.plants.push({ id: uid(), name:"My Plant", species:"Cannabis", stage:"Seedling", startDate: todayISO() });
+    }
+    state.currentPlantId = state.plants[0].id;
+    render();
+  }
+
+  async function savePlants(){
+    if(persistenceMode === 'none') return;
+    await storageBridge.set('plants', JSON.stringify(state.plants));
+  }
+  async function saveEntries(){
+    if(persistenceMode === 'none') return;
+    await storageBridge.set('entries', JSON.stringify(state.entries));
+  }
+  async function saveSettings(){
+    if(persistenceMode === 'none') return;
+    await storageBridge.set('settings', JSON.stringify(state.settings));
+  }
+
+  function currentPlant(){ return state.plants.find(p => p.id === state.currentPlantId); }
+  function plantEntries(plantId){ return state.entries.filter(e => e.plantId === plantId).sort((a,b)=> b.date.localeCompare(a.date)); }
+  function entryForDate(plantId, dateISO){ return state.entries.find(e => e.plantId === plantId && e.date === dateISO); }
+
+  function healthClass(rating){
+    if(rating == null) return '';
+    if(rating >= 4) return 'good';
+    if(rating === 3) return 'mid';
+    return 'bad';
+  }
+  function healthColorVar(rating){
+    if(rating == null) return 'var(--border)';
+    if(rating >= 4) return 'var(--leaf)';
+    if(rating === 3) return 'var(--amber)';
+    return 'var(--stress)';
+  }
+
+  function svgLeaf(){
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2C7 2 3 6 3 12c0 5 3.5 9 9 10 5.5-1 9-5 9-10C21 6 17 2 12 2z" fill="none" stroke="#5FBF6E" stroke-width="1.4"/><path d="M12 4v16M12 8c-2 0-4 1.5-4 4M12 12c2 0 4 1.5 4 4" stroke="#5FBF6E" stroke-width="1.2" stroke-linecap="round"/></svg>';
+  }
+
+  function render(){
+    const plant = currentPlant();
+    const app = document.getElementById('app');
+    const dayOfGrow = plant ? daysBetween(plant.startDate, todayISO()) : 0;
+    const pEntries = plant ? plantEntries(plant.id) : [];
+    const lastWatered = pEntries.find(e => e.watered);
+    const lastWateredDays = lastWatered ? daysBetween(lastWatered.date, todayISO()) : null;
+    const last7 = pEntries.filter(e => daysBetween(e.date, todayISO()) <= 7 && e.healthRating != null);
+    const avgHealth = last7.length ? (last7.reduce((s,e)=>s+e.healthRating,0)/last7.length).toFixed(1) : '—';
+
+    app.innerHTML = `
+      ${persistenceMode === 'none' ? `
+      <div class="warn-banner">
+        ⚠️ <span><strong>Not saving right now.</strong> This browser is blocking local storage (e.g. private/incognito mode, or storage disabled). Entries won't persist between visits — use <strong>Export Data</strong> below before you close this tab, and check your browser's storage/cookie settings.</span>
+      </div>` : ''}
+      <header>
+        <div class="brand">
+          ${svgLeaf()}
+          <div class="brand-text">
+            <h1 id="titleEdit" contenteditable="true" spellcheck="false">${escapeHtml(state.settings.title)}</h1>
+            <p>grow log &middot; feed &amp; water tracker</p>
+          </div>
+        </div>
+        <div class="plant-tabs" id="plantTabs"></div>
+      </header>
+
+      <div class="stats">
+        <div class="stat-card" style="--accent:var(--leaf)">
+          <div class="stat-label">Day of Grow</div>
+          <div class="stat-value">${dayOfGrow}</div>
+          <div class="stat-sub">since ${plant ? formatDate(plant.startDate) : '—'}</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--amber)">
+          <div class="stat-label">Stage</div>
+          <div class="stat-value">${plant ? plant.stage : '—'}</div>
+          <div class="stat-sub">${plant ? plant.species : ''}</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--water)">
+          <div class="stat-label">Last Watered</div>
+          <div class="stat-value">${lastWateredDays === null ? '—' : (lastWateredDays === 0 ? 'Today' : lastWateredDays + 'd ago')}</div>
+          <div class="stat-sub">${lastWatered ? formatDate(lastWatered.date) : 'no records yet'}</div>
+        </div>
+        <div class="stat-card" style="--accent:var(--stress)">
+          <div class="stat-label">Health (7d avg)</div>
+          <div class="stat-value">${avgHealth}${avgHealth !== '—' ? ' / 5' : ''}</div>
+          <div class="stat-sub">${last7.length} logged</div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Grow Calendar</div>
+            <div class="month-nav">
+              <button id="prevMonth">‹</button>
+              <span id="monthLabel"></span>
+              <button id="nextMonth">›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="legend">
+            <span><i style="background:var(--leaf); border-radius:2px;"></i>Logged</span>
+            <span><i style="background:var(--water)"></i>Watered</span>
+            <span><i style="background:var(--amber)"></i>Fed</span>
+            <span><i style="background:var(--leaf)"></i>Healthy</span>
+            <span><i style="background:var(--stress)"></i>Stressed</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">Recent Log</div>
+            <button class="btn-primary" id="newEntryBtn">+ New Entry</button>
+          </div>
+          <div class="log-list" id="logList"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footer-label">Saved in this browser (${persistenceMode === 'claude' ? 'Claude storage' : persistenceMode === 'local' ? 'localStorage' : 'not saving'}) &middot; back it up or move it anytime</div>
+        <div class="footer-actions">
+          <span class="footer-status" id="footerStatus"></span>
+          <button class="btn-ghost" id="exportBtn">Export Data</button>
+          <button class="btn-ghost" id="importBtn">Import Data</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </div>
+      </div>
+    `;
+
+    renderPlantTabs();
+    renderCalendar();
+    renderLog();
+    bindHeaderEvents();
+    bindTitleEdit();
+    bindDataEvents();
+  }
+
+  function bindTitleEdit(){
+    const el = document.getElementById('titleEdit');
+    el.onblur = () => {
+      const val = el.textContent.trim() || 'Greenhouse Journal';
+      el.textContent = val;
+      if(val !== state.settings.title){
+        state.settings.title = val;
+        saveSettings();
+        showFooterStatus('Title saved');
+      }
+    };
+    el.onkeydown = (e) => {
+      if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
+    };
+  }
+
+  function bindDataEvents(){
+    document.getElementById('exportBtn').onclick = exportData;
+    document.getElementById('importBtn').onclick = () => document.getElementById('importFile').click();
+    document.getElementById('importFile').onchange = (e) => {
+      const file = e.target.files[0];
+      if(file) importData(file);
+      e.target.value = '';
+    };
+  }
+
+  function showFooterStatus(msg){
+    const el = document.getElementById('footerStatus');
+    if(!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function exportData(){
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      settings: state.settings,
+      plants: state.plants,
+      entries: state.entries
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = (state.settings.title || 'greenhouse-journal').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    a.href = url;
+    a.download = `${safeName || 'greenhouse-journal'}-${todayISO()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showFooterStatus('Exported');
+  }
+
+  function importData(file){
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try{
+        const data = JSON.parse(reader.result);
+        if(!Array.isArray(data.plants) || !Array.isArray(data.entries)){
+          throw new Error('File is missing plants or entries');
+        }
+        const merge = confirm(
+          "Import data:\n\nOK = Merge with existing plants & entries\nCancel = Replace everything currently stored"
+        );
+        if(merge){
+          const existingPlantIds = new Set(state.plants.map(p => p.id));
+          data.plants.forEach(p => { if(!existingPlantIds.has(p.id)) state.plants.push(p); });
+          const existingEntryIds = new Set(state.entries.map(e => e.id));
+          data.entries.forEach(e => { if(!existingEntryIds.has(e.id)) state.entries.push(e); });
+        } else {
+          state.plants = data.plants;
+          state.entries = data.entries;
+        }
+        if(data.settings && data.settings.title) state.settings.title = data.settings.title;
+        if(state.plants.length && !state.plants.find(p => p.id === state.currentPlantId)){
+          state.currentPlantId = state.plants[0].id;
+        }
+        await savePlants();
+        await saveEntries();
+        await saveSettings();
+        render();
+        showFooterStatus('Imported');
+      }catch(err){
+        alert('Could not import this file: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function formatDate(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  function renderPlantTabs(){
+    const el = document.getElementById('plantTabs');
+    el.innerHTML = state.plants.map(p =>
+      `<button class="plant-tab ${p.id===state.currentPlantId?'active':''}" data-id="${p.id}">${escapeHtml(p.name)}</button>`
+    ).join('') + `<button class="plant-tab-add" id="addPlantBtn">+ Add Plant</button>`;
+
+    el.querySelectorAll('.plant-tab').forEach(btn => {
+      btn.onclick = () => { state.currentPlantId = btn.dataset.id; render(); };
+    });
+    document.getElementById('addPlantBtn').onclick = addPlant;
+  }
+
+  function addPlant(){
+    const name = prompt("Plant name (e.g. 'Blueberry Auto #1'):");
+    if(!name) return;
+    const species = prompt("Species / strain (e.g. Cannabis, Tomato, Basil):", "Cannabis") || "Plant";
+    const p = { id: uid(), name, species, stage:"Seedling", startDate: todayISO() };
+    state.plants.push(p);
+    state.currentPlantId = p.id;
+    savePlants();
+    render();
+  }
+
+  function bindHeaderEvents(){
+    document.getElementById('prevMonth').onclick = () => { changeMonth(-1); };
+    document.getElementById('nextMonth').onclick = () => { changeMonth(1); };
+    document.getElementById('newEntryBtn').onclick = () => openModal(todayISO());
+  }
+
+  function changeMonth(delta){
+    state.viewMonth += delta;
+    if(state.viewMonth < 0){ state.viewMonth = 11; state.viewYear--; }
+    if(state.viewMonth > 11){ state.viewMonth = 0; state.viewYear++; }
+    renderCalendar();
+  }
+
+  function renderCalendar(){
+    const grid = document.getElementById('calGrid');
+    const label = document.getElementById('monthLabel');
+    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    label.textContent = monthNames[state.viewMonth] + ' ' + state.viewYear;
+
+    const first = new Date(state.viewYear, state.viewMonth, 1);
+    const startDow = first.getDay();
+    const daysInMonth = new Date(state.viewYear, state.viewMonth+1, 0).getDate();
+    const dows = ['S','M','T','W','T','F','S'];
+
+    let html = dows.map(d => `<div class="cal-dow">${d}</div>`).join('');
+    for(let i=0;i<startDow;i++) html += `<div class="cal-cell empty"></div>`;
+
+    const plant = currentPlant();
+    for(let day=1; day<=daysInMonth; day++){
+      const iso = `${state.viewYear}-${String(state.viewMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const entry = plant ? entryForDate(plant.id, iso) : null;
+      const isToday = iso === todayISO();
+      let dots = '';
+      if(entry){
+        if(entry.watered) dots += `<span class="dot" style="background:var(--water)"></span>`;
+        if(entry.fed) dots += `<span class="dot" style="background:var(--amber)"></span>`;
+      }
+      html += `
+        <div class="cal-cell ${entry?'has-entry':''} ${isToday?'today':''}" data-date="${iso}">
+          ${entry && entry.healthRating != null ? `<div class="ring" style="border-color:${healthColorVar(entry.healthRating)}"></div>` : ''}
+          ${entry ? `<div class="day-check" title="Logged"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5.5L20 6" stroke="#0F1712" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>` : ''}
+          <span class="cal-daynum">${day}</span>
+          <div class="dot-row">${dots}</div>
+        </div>`;
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll('.cal-cell[data-date]').forEach(cell => {
+      cell.onclick = () => openModal(cell.dataset.date);
+    });
+  }
+
+  function renderLog(){
+    const list = document.getElementById('logList');
+    const plant = currentPlant();
+    if(!plant){ list.innerHTML = `<div class="empty-state">No plant selected.</div>`; return; }
+    const entries = plantEntries(plant.id);
+    if(entries.length === 0){
+      list.innerHTML = `<div class="empty-state">No entries yet.<br>Log a watering, feeding, or health check to start your journal.</div>`;
+      return;
+    }
+    list.innerHTML = entries.map(e => {
+      let tags = '';
+      if(e.watered) tags += `<span class="tag water">Water</span>`;
+      if(e.fed) tags += `<span class="tag feed">Feed</span>`;
+      if(e.healthRating != null) tags += `<span class="tag health-${healthClass(e.healthRating)}">Health ${e.healthRating}/5</span>`;
+      return `
+        <div class="log-entry" data-date="${e.date}">
+          <div class="log-entry-top">
+            <span class="log-date">${formatDate(e.date)}</span>
+            <div class="log-tags">${tags}</div>
+          </div>
+          ${e.notes ? `<div class="log-note">${escapeHtml(e.notes)}</div>` : ''}
+        </div>`;
+    }).join('');
+    list.querySelectorAll('.log-entry').forEach(el => {
+      el.onclick = () => openModal(el.dataset.date);
+    });
+  }
+
+  function escapeHtml(s){
+    const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML;
+  }
+
+  function openModal(dateISO){
+    const plant = currentPlant();
+    if(!plant) return;
+    const existing = entryForDate(plant.id, dateISO);
+    state.modalDate = dateISO;
+    state.modalEntry = existing ? {...existing} : {
+      id: uid(), plantId: plant.id, date: dateISO,
+      watered:false, waterAmount:'', waterPh:'',
+      fed:false, nutrient:'', feedDose:'', feedPh:'',
+      healthRating:null, height:'', stage:plant.stage, notes:''
+    };
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    backdrop.id = 'modalBackdrop';
+    backdrop.innerHTML = buildModalHtml(plant);
+    document.body.appendChild(backdrop);
+
+    backdrop.onclick = (e) => { if(e.target === backdrop) closeModal(); };
+    bindModalEvents(plant, !!existing);
+  }
+
+  function buildModalHtml(plant){
+    const m = state.modalEntry;
+    const stageOptions = STAGES.map(s => `<option value="${s}" ${m.stage===s?'selected':''}>${s}</option>`).join('');
+    return `
+      <div class="modal">
+        <h2>${escapeHtml(plant.name)}</h2>
+        <div class="modal-date">${formatDate(m.date)}</div>
+
+        <div class="field-group">
+          <div class="field-group-head">
+            <div class="toggle ${m.watered?'on':''}" id="waterToggle"></div>
+            <label>Watering</label>
+          </div>
+          <div class="subfields ${m.watered?'':'hidden'}" id="waterFields">
+            <input type="text" id="waterAmount" placeholder="Amount (e.g. 1.5L)" value="${escapeHtml(m.waterAmount)}">
+            <input type="text" id="waterPh" placeholder="pH (e.g. 6.2)" value="${escapeHtml(m.waterPh)}">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-head">
+            <div class="toggle ${m.fed?'on':''}" id="feedToggle"></div>
+            <label>Feeding</label>
+          </div>
+          <div class="subfields ${m.fed?'':'hidden'}" id="feedFields">
+            <input type="text" id="nutrient" placeholder="Nutrient (e.g. Grow A+B)" value="${escapeHtml(m.nutrient)}">
+            <input type="text" id="feedDose" placeholder="Dose / EC-PPM" value="${escapeHtml(m.feedDose)}">
+            <input type="text" id="feedPh" placeholder="pH (e.g. 6.0)" value="${escapeHtml(m.feedPh)}" style="grid-column:1/3">
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-head"><label>Plant Health</label></div>
+          <div class="health-scale" id="healthScale">
+            ${[1,2,3,4,5].map(n => `<div class="health-btn ${m.healthRating===n?'selected':''}" data-val="${n}">${n}</div>`).join('')}
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-head"><label>Height / Stage</label></div>
+          <div class="subfields">
+            <input type="text" id="height" placeholder="Height (e.g. 24cm)" value="${escapeHtml(m.height)}">
+            <select id="stageSelect">${stageOptions}</select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-group-head"><label>Notes</label></div>
+          <textarea id="notes" placeholder="Leaf color, training, pests, smell, anything worth remembering...">${escapeHtml(m.notes)}</textarea>
+        </div>
+
+        <div class="modal-actions">
+          <div>${state.modalEntryExists ? `<button class="btn-ghost" id="deleteEntryBtn">Delete</button>` : ''}</div>
+          <div class="modal-actions-right">
+            <button class="btn-ghost" id="cancelBtn">Cancel</button>
+            <button class="btn-primary" id="saveEntryBtn">Save Entry</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindModalEvents(plant, exists){
+    state.modalEntryExists = exists;
+    document.getElementById('waterToggle').onclick = function(){
+      state.modalEntry.watered = !state.modalEntry.watered;
+      this.classList.toggle('on');
+      document.getElementById('waterFields').classList.toggle('hidden');
+    };
+    document.getElementById('feedToggle').onclick = function(){
+      state.modalEntry.fed = !state.modalEntry.fed;
+      this.classList.toggle('on');
+      document.getElementById('feedFields').classList.toggle('hidden');
+    };
+    document.querySelectorAll('#healthScale .health-btn').forEach(btn => {
+      btn.onclick = function(){
+        state.modalEntry.healthRating = Number(this.dataset.val);
+        document.querySelectorAll('#healthScale .health-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+      };
+    });
+    document.getElementById('cancelBtn').onclick = closeModal;
+    const delBtn = document.getElementById('deleteEntryBtn');
+    if(delBtn) delBtn.onclick = () => deleteEntry(state.modalEntry.id);
+    document.getElementById('saveEntryBtn').onclick = () => saveEntryFromModal(plant);
+  }
+
+  function saveEntryFromModal(plant){
+    const m = state.modalEntry;
+    m.waterAmount = document.getElementById('waterAmount').value;
+    m.waterPh = document.getElementById('waterPh').value;
+    m.nutrient = document.getElementById('nutrient').value;
+    m.feedDose = document.getElementById('feedDose').value;
+    m.feedPh = document.getElementById('feedPh').value;
+    m.height = document.getElementById('height').value;
+    m.stage = document.getElementById('stageSelect').value;
+    m.notes = document.getElementById('notes').value;
+
+    const idx = state.entries.findIndex(e => e.id === m.id);
+    if(idx >= 0) state.entries[idx] = m; else state.entries.push(m);
+
+    plant.stage = m.stage;
+    saveEntries();
+    savePlants();
+    closeModal();
+    render();
+  }
+
+  function deleteEntry(id){
+    state.entries = state.entries.filter(e => e.id !== id);
+    saveEntries();
+    closeModal();
+    render();
+  }
+
+  function closeModal(){
+    const b = document.getElementById('modalBackdrop');
+    if(b) b.remove();
+  }
+
+  loadState();
+})();
+</script>
+</body>
+</html>
